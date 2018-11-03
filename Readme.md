@@ -4,7 +4,7 @@ NYN 是一个使用 Go 语言编写的爬虫框架.
 
 ## 使用例
 
-参见 <https://github.com/touee/nyn/examples>
+参见[这里](./nyn/examples)
 
 ## TODO
 
