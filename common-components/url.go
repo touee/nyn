@@ -18,13 +18,22 @@ var client = http.Client{Timeout: time.Second * 10}
 // 响应相关的问题/错误应该在这里处理
 func (HTTPURLGetFetcher) Fetch(c *nyn.Crawler, task nyn.Task) (payload interface{}, err error) {
 
-	var resp *http.Response
-	//resp, err = http.Get(task.(interface{ GetURL() string }).GetURL())
-	resp, err = client.Get(task.(interface{ GetURL() string }).GetURL())
+	var (
+		req  *http.Request
+		resp *http.Response
+	)
+
+	if req, err = http.NewRequest("GET", task.(interface{ GetURL() string }).GetURL(), nil); err != nil {
+		panic(err) // ?
+	}
+	if ua, ok := c.Global["User-Agent"]; ok {
+		req.Header.Set("User-Agent", ua.(string))
+	}
+	resp, err = client.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		resp.Body.Close()
 		return nil, BadStatusCodeError{resp.StatusCode}
 	}
