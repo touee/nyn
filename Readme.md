@@ -2,6 +2,8 @@
 
 NYN 是一个使用 Go 语言编写的爬虫框架. 
 
+[![GoDoc](https://godoc.org/github.com/touee/nyn?status.svg)](https://godoc.org/github.com/touee/nyn) [![Go Report Card](https://goreportcard.com/badge/github.com/touee/nyn)](https://goreportcard.com/report/github.com/touee/nyn)
+
 ## 使用例
 
 参见[这里](./examples)
@@ -31,5 +33,10 @@ NYN 是一个使用 Go 语言编写的爬虫框架.
 * [ ] `crawler.GetShared()`, `crawler.SetShared()`, 同类型任务间共享的内容
 * [ ] 用 TaskHandler 替代任务委托中传入的 `Crawler`
   * [ ] `Crawler.TaskLog` -> `TaskHandler.TaskLog`
-* [ ] 考虑使用 swift 重写 (这个爬虫框架的思路在 Go 上显得很繁琐, 但配合 Swift 的 protocol + extension (+ 错误处理机制 )应该会清晰不少)
+* [ ] 考虑使用 swift 重写 (这个爬虫框架的思路在 Go 上显得很繁琐, 但配合 Swift 的 protocol + extension (+ 错误处理机制 + …)应该会清晰不少)
+
+文档
+
+* [ ] 编写英文文档/注释
+* [ ] 补充更详细的说明
 
