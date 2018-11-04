@@ -72,15 +72,9 @@ func main() {
 		panic(err)
 	}
 
-	//c.Global["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Safari/605.1.15"
+	c.Global["User-Agent"] = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/12.0 Safari/605.1.15"
 
-	if err = c.RegisterTaskType(ArticleListTask{}); err != nil {
-		panic(err)
-	}
-	if err = c.RegisterTaskType(ArticleTask{}); err != nil {
-		panic(err)
-	}
-	if err = c.RegisterTaskType(ArticleStatusesTask{}); err != nil {
+	if err = c.RegisterTaskTypes(ArticleListTask{}, ArticleTask{}, ArticleStatusesTask{}); err != nil {
 		panic(err)
 	}
 
