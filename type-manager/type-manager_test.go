@@ -50,7 +50,9 @@ func TestStorage(t *testing.T) {
 	}
 
 	// 重新打开该 TypeManager
-	m, err = typemanager.OpenTypeManager(fileName, datapacker.DefaultPacker)
+	if m, err = typemanager.OpenTypeManager(fileName, datapacker.DefaultPacker); err != nil {
+		t.Fatal(err)
+	}
 
 	{ //< 通过注册一个与之前注册类型的类型名相同但签名不同的类型, 判断返回的错误是否是签名类型不同, 来判断注册的类型是否被成功存储
 		type T1 struct{}
@@ -108,7 +110,9 @@ func TestPackAndUnpack(t *testing.T) {
 	}
 
 	// 重新打开该 TypeManager
-	m, err = typemanager.OpenTypeManager(fileName, datapacker.DefaultPacker)
+	if m, err = typemanager.OpenTypeManager(fileName, datapacker.DefaultPacker); err != nil {
+		t.Fatal(err)
+	}
 
 	err = m.Register(T1{})
 	if err != nil {
