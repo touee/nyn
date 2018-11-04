@@ -199,11 +199,6 @@ func NewCrawler(opts CrawlerOptions) (c *Crawler, err error) {
 	return c, nil
 }
 
-// RegisterTaskType 注册一个任务类型
-func (c *Crawler) RegisterTaskType(dummyTask Task) (err error) {
-	return c.scheduler.RegisterTaskType(dummyTask)
-}
-
 // RegisterTaskTypes 注册任务类型
 func (c *Crawler) RegisterTaskTypes(dummyTasks ...Task) (err error) {
 	for _, dummyTask := range dummyTasks {
@@ -226,9 +221,15 @@ func (c *Crawler) RequestWithOptions(task Task, opts RequestOptions) (err error)
 	return err
 }
 
-// Request 添加一个任务请求
-func (c *Crawler) Request(task Task) (err error) {
-	return c.RequestWithOptions(task, RequestOptions{Priority: 1})
+// Request 添加任务请求
+func (c *Crawler) Request(tasks ...Task) (err error) {
+	for _, task := range tasks {
+		err = c.RequestWithOptions(task, RequestOptions{Priority: 1})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Run 启动爬虫
