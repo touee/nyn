@@ -204,6 +204,16 @@ func (c *Crawler) RegisterTaskType(dummyTask Task) (err error) {
 	return c.scheduler.RegisterTaskType(dummyTask)
 }
 
+// RegisterTaskTypes 注册任务类型
+func (c *Crawler) RegisterTaskTypes(dummyTasks ...Task) (err error) {
+	for _, dummyTask := range dummyTasks {
+		if err = c.scheduler.RegisterTaskType(dummyTask); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // RequestOptions 是任务请求的设置
 type RequestOptions = taskqueue.EnqueueOptions
 
