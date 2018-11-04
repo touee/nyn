@@ -52,7 +52,7 @@ func Open(path string) (q *Queue, err error) {
 			('i_factory', 1),
 			('default_maximum_attempts', %d)`, DefaultDefaultMaxAttempts),
 
-			// 项目表, 存放所有项目
+			// 任务表, 存放所有任务
 			`CREATE TABLE tasks (
 				task_id      INTEGER NOT NULL,
 
@@ -65,7 +65,7 @@ func Open(path string) (q *Queue, err error) {
 				UNIQUE(task_type_id, task_data)
 			)`,
 
-			// 队列表, 存放处于队列中的项目
+			// 队列表, 存放处于队列中的任务
 			`CREATE TABLE pending_queue (
 				task_id       INTEGER NOT NULL, -- 可正可负, 且决定队列中的先后顺序
 				-- TODO: item_index
