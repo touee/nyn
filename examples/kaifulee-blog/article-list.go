@@ -17,20 +17,21 @@ type ArticleListTask struct {
 	components.HTTPURLGetFetcher
 	components.HTTPResponseGoqueryDecorator
 
-	ID         int
-	PageNumber int
+	ID, PageNumber int
 }
 
-// GetURL 获取 URL
+// GetURL 获取任务对应的 URL
 func (task ArticleListTask) GetURL() string {
 	return fmt.Sprintf("http://blog.sina.com.cn/s/articlelist_%d_0_%d.html", task.ID, task.PageNumber)
 }
 
-// http://blog.sina.com.cn/s/blog_475b3d560102y8ke.html
-var articleURLRX = regexp.MustCompile(`blog_(.{8})01(.{6})\.html`)
+var (
+	// http://blog.sina.com.cn/s/blog_475b3d560102y8ke.html
+	articleURLRX = regexp.MustCompile(`blog_(.{8})01(.{6})\.html`)
 
-// http://blog.sina.com.cn/s/articlelist_1197161814_0_1.html
-var articleListURLRX = regexp.MustCompile(`articlelist_(.*)_0_(.*)\.html`)
+	// http://blog.sina.com.cn/s/articlelist_1197161814_0_1.html
+	articleListURLRX = regexp.MustCompile(`articlelist_(.*)_0_(.*)\.html`)
+)
 
 // Process 处理获取到的文章列表
 func (task ArticleListTask) Process(c *nyn.Crawler, _ nyn.Task, payload interface{}) (result taskqueue.ProcessResult, err error) {

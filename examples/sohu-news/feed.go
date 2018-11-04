@@ -16,6 +16,8 @@ import (
 	taskqueue "github.com/touee/nyn/task-queue"
 )
 
+const feedSize = 100
+
 // FeedTask 是获取 feed 的任务
 type FeedTask struct {
 	components.HTTPURLGetFetcher
@@ -25,8 +27,8 @@ type FeedTask struct {
 	Page    int
 }
 
-// Feeds 表示 feed api 返回的 json 的结构
-type Feeds []Article
+// Feed 表示 feed api 返回的 json 的结构
+type Feed []Article
 
 // Article 表示 feed api 返回的 json 中, 单篇文章的结构
 type Article struct {
@@ -41,16 +43,16 @@ type Article struct {
 
 // ArticleTag 表示 Article 所属的 tag
 type ArticleTag struct {
-	ID   int    `json:"id"`
+	//ID   int    `json:"id"`
 	Name string `json:"name"`
 }
 
-// GetURL 获取 URL
+// GetURL 获取任务对应的 URL
 func (task FeedTask) GetURL() string {
-	return fmt.Sprintf("http://v2.sohu.com/public-api/feed?scene=CATEGORY&sceneId=%d&page=%d&size=100", task.SceneID, task.Page)
+	return fmt.Sprintf("http://v2.sohu.com/public-api/feed?scene=CATEGORY&sceneId=%d&page=%d&size=%d", task.SceneID, task.Page, feedSize)
 }
 
-var feedsType = reflect.TypeOf(Feeds{})
+var feedsType = reflect.TypeOf(Feed{})
 
 // GetPayloadType 是 Process 所要的 payload 的类型
 func (task FeedTask) GetPayloadType() reflect.Type {
@@ -60,7 +62,7 @@ func (task FeedTask) GetPayloadType() reflect.Type {
 // Process 处理获取到的 feed
 func (task FeedTask) Process(c *nyn.Crawler, _ nyn.Task, payload interface{}) (result taskqueue.ProcessResult, err error) {
 	c.TaskLog(logger.LInfo, "开始处理 feed", logger.Fields{{"task", task}})
-	var feeds = payload.(Feeds)
+	var feed = payload.(Feed)
 
 	var lock = c.Global["db-lock"].(*sync.Mutex)
 	lock.Lock()
@@ -69,21 +71,25 @@ func (task FeedTask) Process(c *nyn.Crawler, _ nyn.Task, payload interface{}) (r
 	if tx, err = c.Global["db"].(*sql.DB).Begin(); err != nil {
 		panic(err)
 	}
-	for _, feed := range feeds {
-		var t = time.Unix(0, feed.PublicationTimeMilli*int64(time.Millisecond)-time.Hour.Nanoseconds()*8)
-		var tags string
-		if tagsBytes, err := json.Marshal(feed.Tags); err != nil {
+	for _, article := range feed {
+		var t = time.Unix(0, article.PublicationTimeMilli*int64(time.Millisecond)-time.Hour.Nanoseconds()*8)
+		var tags = []string{}
+		for _, tag := range article.Tags {
+			tags = append(tags, tag.Name)
+		}
+		var tagsJSON string
+		if tagsBytes, err := json.Marshal(tags); err != nil {
 			panic(err)
 		} else {
-			tags = string(tagsBytes)
+			tagsJSON = string(tagsBytes)
 		}
 
-		var newTask = ArticleTask{ID: feed.ID, AuthorID: feed.AuthorID}
+		var newTask = ArticleTask{ID: article.ID, AuthorID: article.AuthorID}
 
 		if _, err = tx.Exec(`
 		INSERT INTO sohu_news (title, url, article_id, author_id, author_name, publication_time, tags, source_url) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-		`, feed.Title, newTask.GetURL(), feed.ID, feed.AuthorID, feed.AuthorName, t.Unix(), tags, feed.SourceURL); err != nil {
+		`, article.Title, newTask.GetURL(), article.ID, article.AuthorID, article.AuthorName, t.Unix(), tagsJSON, article.SourceURL); err != nil {
 			if err == sqlite3.ErrConstraintUnique {
 				c.TaskLog(logger.LWarning, "重复新闻", logger.Fields{{"newTask", newTask}})
 			} else {
@@ -97,7 +103,7 @@ func (task FeedTask) Process(c *nyn.Crawler, _ nyn.Task, payload interface{}) (r
 
 	lock.Unlock()
 
-	if task.Page < 100 {
+	if len(feed) != 0 {
 		if err = c.Request(FeedTask{SceneID: task.SceneID, Page: task.Page + 1}); err != nil {
 			panic(err)
 		}

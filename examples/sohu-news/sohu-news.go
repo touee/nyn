@@ -49,7 +49,7 @@ func main() {
 			read_count       INTEGER NULL,
 			comment_count    INTEGER NULL,
 	
-			PRIMARY KEY (url)
+			PRIMARY KEY (article_id)
 		)`,
 		`CREATE TABLE IF NOT EXISTS sohu_news_comments (
 			article_id    INTEGER NOT NULL,
@@ -59,7 +59,7 @@ func main() {
 			content       TEXT    NOT NULL,
 			user_id       TEXT    NOT NULL,
 	
-			FOREIGN KEY (article_id) REFERENCES sohu_news (article_id),
+			FOREIGN KEY (article_id) REFERENCES sohu_news  (article_id),
 			FOREIGN KEY (user_id)    REFERENCES sohu_users (user_id)
 		)`,
 		`CREATE TABLE IF NOT EXISTS sohu_users (
@@ -80,13 +80,7 @@ func main() {
 		panic(err)
 	}
 
-	if err = c.RegisterTaskType(FeedTask{}); err != nil {
-		panic(err)
-	}
-	if err = c.RegisterTaskType(ArticleTask{}); err != nil {
-		panic(err)
-	}
-	if err = c.RegisterTaskType(ArticleCommentsTask{}); err != nil {
+	if err = c.RegisterTaskTypes(FeedTask{}, ArticleTask{}, ArticleCommentsTask{}, PVTask{}); err != nil {
 		panic(err)
 	}
 

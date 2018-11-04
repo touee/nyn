@@ -21,7 +21,7 @@ type ArticleTask struct {
 	AuthorID int
 }
 
-// GetURL 获取 URL
+// GetURL 获取任务对应的 URL
 func (task ArticleTask) GetURL() string {
 	return fmt.Sprintf("http://www.sohu.com/a/%d_%d", task.ID, task.AuthorID)
 }
@@ -35,8 +35,7 @@ func (task ArticleTask) Process(c *nyn.Crawler, _ nyn.Task, payload interface{})
 	var (
 		url = task.GetURL()
 
-		content   string
-		readCount = doc.Find(".read-num em").Text()
+		content string
 	)
 
 	if content, err = doc.Find(".article").Html(); err != nil {
@@ -46,13 +45,15 @@ func (task ArticleTask) Process(c *nyn.Crawler, _ nyn.Task, payload interface{})
 	var lock = c.Global["db-lock"].(*sync.Mutex)
 	lock.Lock()
 	if _, err = c.Global["db"].(*sql.DB).Exec(`
-	UPDATE sohu_news SET content = ?, read_count = ? WHERE url = ?
-	`, content, readCount, url); err != nil {
+	UPDATE sohu_news SET content = ? WHERE article_id = ?
+	`, content, task.ID); err != nil {
 		panic(err)
 	}
 	lock.Unlock()
 
-	c.Request(ArticleCommentsTask{ID: task.ID, PageNO: 1})
+	if err = c.Request(ArticleCommentsTask{ID: task.ID, PageNO: 1}, PVTask{ID: task.ID}); err != nil {
+		panic(err)
+	}
 
 	return taskqueue.ProcessResultSuccessful, err
 }

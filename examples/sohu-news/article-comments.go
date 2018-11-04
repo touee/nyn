@@ -48,7 +48,7 @@ type Comment struct {
 	} `json:"passport"`
 }
 
-// GetURL 获取 URL
+// GetURL 获取任务对应的 URL
 func (task ArticleCommentsTask) GetURL() string {
 	return fmt.Sprintf("http://apiv2.sohu.com/api/topic/load?page_size=100&page_no=%d&source_id=mp_%d", task.PageNO, task.ID)
 }
@@ -105,7 +105,7 @@ func (task ArticleCommentsTask) Process(c *nyn.Crawler, _ nyn.Task, payload inte
 
 		if _, err = tx.Exec(`
 		INSERT OR IGNORE INTO sohu_news_comments (article_id, comment_id, creation_time, reference_ids, content, user_id) VALUES (?, ?, ?, ?, ?, ?)
-		`, task.ID, comment.CommentID, t, string(referenceIDsJSON), comment.Content, comment.Passport.UserID); err != nil {
+		`, task.ID, comment.CommentID, t.Unix(), string(referenceIDsJSON), comment.Content, comment.Passport.UserID); err != nil {
 			panic(err)
 		}
 

@@ -89,13 +89,14 @@ func main() {
 		panic(err)
 	}
 
-	if err = c.RegisterTaskType(SimpleTask{}); err != nil {
+	if err = c.RegisterTaskTypes(SimpleTask{}); err != nil {
 		panic(err)
 	}
 
 	c.Global["count"] = 0
 	c.Global["count-lock"] = &sync.Mutex{}
 
+	// ¯\_(ツ)_/¯
 	if err = c.Request(SimpleTask{URL: "http://go-colly.org/"}); err != nil {
 		panic(err)
 	}
