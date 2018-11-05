@@ -1,6 +1,8 @@
 package datapacker
 
-import objpack "github.com/touee/go-objpack"
+import (
+	objpack "github.com/touee/nyn/data-packer/objpack"
+)
 
 // ObjpackPacker 是通过包装 "github.com/touee/nyn/objpack" 包中的功能实现的 Packer
 type ObjpackPacker struct{}
